@@ -161,8 +161,19 @@ under Settings → Connectors (`PUT /settings/mcp-servers`), and the urls
 names must match `agent-activity-source` and `policy-ledger` exactly.
 
 `manifest.model.name` must be a `provider/model` FQN where the provider
-segment is the name of a configured model provider — `anthropic/claude-opus-5`
-assumes the Anthropic provider is registered as `anthropic`.
+segment names a configured model provider, so `openai/gpt-5-4-mini`
+assumes the OpenAI provider is registered as `openai`. TrueForge also
+ships presets for `anthropic`, `google-gemini`, `alibaba`, `fireworks`,
+`moonshot`, `together`, `zai`, and `custom` — swapping providers is a
+one-line change and does not affect the approval pause, which the harness
+enforces from the tool annotation regardless of model.
+
+TrueForge blocks loopback URLs by default, so it will reject both MCP
+servers unless you start it with them allowed:
+
+```bash
+OUTBOUND_URL_ALLOWED_HOSTS='["127.0.0.1","localhost","::1"]' npx @truefoundry/trueforge
+```
 
 ## Demo script
 
