@@ -33,6 +33,16 @@ from dataclasses import dataclass, asdict
 from pathlib import Path
 
 BASE_PREMIUM = float(os.environ.get("RISKBIND_BASE_PREMIUM", "1000.0"))
+
+# The only tiers risk_model.py can emit, and the multiplier each one carries.
+# draft_policy_quote refuses anything else: a quote is only meaningful if the
+# numbers behind it actually came out of the model.
+VALID_TIERS = {
+    "preferred": 0.85,
+    "standard": 1.0,
+    "substandard": 1.6,
+    "decline": None,
+}
 LEDGER_PATH = Path(
     os.environ.get("RISKBIND_LEDGER_PATH", Path(__file__).parent / "policy_ledger.jsonl")
 )
@@ -48,11 +58,63 @@ class PolicyQuote:
     rationale: str
 
 
+def _validate_risk_result(risk_result: dict) -> None:
+    """
+    Reject anything that cannot have come out of risk_model.score_agent.
+
+    This exists because an agent that fails to run the risk model will
+    cheerfully invent a plausible-looking risk_result and pass it here --
+    observed in practice: tier "low", credibility_z 1.8. Quoting on
+    fabricated numbers is worse than failing, because the output looks
+    exactly like a real quote. Fail loudly instead, so the agent sees the
+    error and has to go and actually run the model.
+    """
+    if not isinstance(risk_result, dict):
+        raise ValueError("risk_result must be an object from risk_model.py")
+
+    for field in ("agent_id", "risk_score", "tier"):
+        if field not in risk_result:
+            raise ValueError(f"risk_result is missing '{field}'; it must be the "
+                             f"unmodified JSON output of risk_model.py")
+
+    tier = risk_result["tier"]
+    if tier not in VALID_TIERS:
+        raise ValueError(
+            f"unknown tier {tier!r}. risk_model.py only ever emits "
+            f"{sorted(VALID_TIERS)}. This risk_result did not come from the "
+            f"risk model -- run it on the activity data and pass its output through unchanged."
+        )
+
+    score = risk_result["risk_score"]
+    if not isinstance(score, (int, float)) or isinstance(score, bool) or not 0 <= score <= 100:
+        raise ValueError(f"risk_score must be a number in 0..100, got {score!r}")
+
+    z = risk_result.get("credibility_z")
+    if z is not None and (not isinstance(z, (int, float)) or isinstance(z, bool) or not 0 <= z <= 1):
+        raise ValueError(f"credibility_z must be a number in 0..1, got {z!r}")
+
+    expected = VALID_TIERS[tier]
+    actual = risk_result.get("premium_multiplier")
+    if expected is None:
+        if actual is not None:
+            raise ValueError(f"tier 'decline' carries no premium_multiplier, got {actual!r}")
+    elif actual is None or abs(float(actual) - expected) > 1e-9:
+        raise ValueError(
+            f"tier {tier!r} carries premium_multiplier {expected}, got {actual!r}. "
+            f"The tier and multiplier disagree, so this risk_result was not produced "
+            f"by risk_model.py."
+        )
+
+
 def draft_policy_quote(risk_result: dict) -> PolicyQuote:
     """
     risk_result is exactly the JSON risk_model.score_agent produces:
     {agent_id, risk_score, tier, premium_multiplier, credibility_z, rationale}
+
+    Validated on the way in -- see _validate_risk_result.
     """
+    _validate_risk_result(risk_result)
+
     agent_id = risk_result["agent_id"]
     tier = risk_result["tier"]
     multiplier = risk_result.get("premium_multiplier")

@@ -11,11 +11,20 @@ dependencies beyond the standard library.
 
 ## How to run it
 
+This skill is mounted at `skills/risk-scoring/` relative to the sandbox
+working directory, so the script is at `skills/risk-scoring/risk_model.py`.
+There is no `/workspace` and no container root — use the relative path
+below exactly as written, from the default working directory.
+
 `risk_model.py` reads JSON on stdin and writes JSON on stdout:
 
 ```bash
-echo '{"agent_id":"agent-safe-01","n_actions":240,"n_flagged_actions":2,"max_single_exposure":80}' | python3 risk_model.py
+echo '{"agent_id":"agent-safe-01","n_actions":240,"n_flagged_actions":2,"max_single_exposure":80}' | python3 skills/risk-scoring/risk_model.py
 ```
+
+It needs only the Python standard library — no pip install, no venv
+activation. If that path somehow misses, locate it with
+`find . -name risk_model.py` rather than guessing another absolute path.
 
 Input — exactly what `get_agent_activity` returns:
 
