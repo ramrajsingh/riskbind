@@ -9,6 +9,55 @@ or declining coverage. Built for the TrueFoundry × Polaris hackathon
 The pitch: an insurance company underwriting an AI agent, live, using an
 AI agent.
 
+## Submission writeup
+
+> **Before submitting, verify one claim below.** The sentence marked
+> †contingent† describes the live TrueForge wiring, which is built and
+> schema-validated but has not yet been run end-to-end against a live
+> instance. Either complete that run or soften the sentence — do not
+> submit it as-is if it hasn't happened.
+
+**Problem.** Autonomous agents now move money and change permissions, and
+nothing prices what happens when one acts wrong. Riskbind is the
+underwriting side of that: an insurer that reviews an agent's behaviour,
+prices the risk, and binds, loads, or declines cover.
+
+**What the agent reaches.** `get_agent_activity`, on a real MCP server
+over streamable-http, returns a monitored agent's recent history: how many
+actions, how many tripped a rule check, and the largest single exposure.
+
+**Where it stops.** `bind_or_flag` writes a binding decision to the policy
+ledger. It is annotated `destructiveHint=true`, so TrueForge pauses for
+human approval before it runs — including on declines, which are binding
+decisions too.
+
+**Architecture.** `get_agent_activity` (MCP) → `run_risk_model` (sandboxed
+skill) → `draft_policy_quote` (safe) → **approval pause** → `bind_or_flag`
+(irreversible). The model blends flagged-action frequency, severity
+against a portfolio baseline, and a Bühlmann credibility weight — full
+credibility at 200 observed actions — into a 0–100 score, tiered
+preferred / standard / substandard / decline.
+
+**How TrueForge was used.** †Both MCP servers are registered as connectors
+and the risk model is mounted as a skill, executed in TrueForge's
+sandbox.† Approval is driven by `require_approval_for_tools`. Three
+independent guards stop the irreversible step: the approval pause, Code
+Mode's refusal to call any non-read-only tool, and the tool's own
+`human_confirmed` check.
+
+**Real vs mocked.** Real: both MCP servers, the scoring, the ledger
+writes, and the approval gating — `test_approval_gate.py` asserts that
+`bind_or_flag`, and only `bind_or_flag`, pauses. Mocked: the three demo
+agents are canned fixtures inside the activity server, chosen over a live
+API so the demo carries no network dependency. Pointing them at Stripe
+test-mode payment history changes one function body, not the tool
+contract.
+
+**Known limits.** The risk model is deliberately simplified; the
+production work uses compound Poisson, Cox jump-diffusion and Gumbel
+copulas. Portfolio priors are hardcoded rather than fitted. The ledger is
+an append-only JSON-lines file standing in for a system of record.
+
 ## Pipeline
 
 ```
