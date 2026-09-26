@@ -11,12 +11,6 @@ AI agent.
 
 ## Submission writeup
 
-> **Before submitting, verify one claim below.** The sentence marked
-> †contingent† describes the live TrueForge wiring, which is built and
-> schema-validated but has not yet been run end-to-end against a live
-> instance. Either complete that run or soften the sentence — do not
-> submit it as-is if it hasn't happened.
-
 **Problem.** Autonomous agents now move money and change permissions, and
 nothing prices what happens when one acts wrong. Riskbind is the
 underwriting side of that: an insurer that reviews an agent's behaviour,
@@ -38,9 +32,11 @@ against a portfolio baseline, and a Bühlmann credibility weight — full
 credibility at 200 observed actions — into a 0–100 score, tiered
 preferred / standard / substandard / decline.
 
-**How TrueForge was used.** †Both MCP servers are registered as connectors
-and the risk model is mounted as a skill, executed in TrueForge's
-sandbox.† Approval is driven by `require_approval_for_tools`. Three
+**How TrueForge was used.** Both MCP servers are registered as
+connectors; the risk model is a git skill run in TrueForge's sandbox.
+Verified end to end on 0.2.1: activity pulled live, scored in the sandbox
+to 5.64 / preferred / $850, `tool.approval_required` raised at
+`bind_or_flag`, ledger empty until approval, written only after. Three
 independent guards stop the irreversible step: the approval pause, Code
 Mode's refusal to call any non-read-only tool, and the tool's own
 `human_confirmed` check.
@@ -192,10 +188,13 @@ The spread, in one line each:
 
 ## Still open
 
-- [ ] End-to-end run against a live TrueForge instance: register both MCP
-      servers and the `risk-scoring` skill, POST `agent-spec.json`, and
-      watch the approval prompt appear in the UI. The gating logic is
-      verified (see above); the wiring is not.
+- [x] ~~End-to-end run against a live TrueForge instance.~~ Done on
+      0.2.1 — approval fired at `bind_or_flag`, ledger written only after
+      approval. Two host prerequisites, both easy to trip over:
+      `OUTBOUND_URL_ALLOWED_HOSTS` (above), and **git must come from
+      Homebrew** — the sandbox deliberately does not allow-read the Xcode
+      select paths, so `/usr/bin/git` is a shim that fails inside it and
+      skills never clone (`brew install git`).
 - [x] ~~Point the demo agents at a live external source.~~ **Decided:
       they stay local.** No venue-wifi dependency on stage, and it's
       still a real MCP call. The tool contract is `agent_id` in, activity
