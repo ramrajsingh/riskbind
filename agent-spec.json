@@ -1,0 +1,40 @@
+{
+  "name": "riskbind",
+  "description": "Reviews an AI agent's recent activity, scores its risk with a Bühlmann-style credibility model, drafts a policy quote, and pauses for human approval before binding or flagging.",
+  "manifest": {
+    "model": {
+      "name": "anthropic/claude-opus-5"
+    },
+
+    "instructions": "You are an underwriting agent for autonomous AI agents. Given an agent_id: (1) call get_agent_activity to pull its recent actions, (2) run the risk-scoring skill's risk_model.py in the sandbox with that activity to get a risk score and tier, (3) call draft_policy_quote to turn that into a premium and recommendation, (4) present the quote to the user and, only after explicit confirmation, call bind_or_flag.\n\nbind_or_flag is irreversible: it writes the binding decision to the policy ledger. It is annotated destructive, so the harness will pause and ask the user to approve the call before it executes. Never argue around that pause, and never claim a policy is bound until the tool has actually returned a written result.",
+
+    "mcp_servers": [
+      {
+        "name": "agent-activity-source",
+        "enable_tools": ["@all"],
+        "require_approval_for_tools": ["@destructive"],
+        "preload": true
+      },
+      {
+        "name": "policy-ledger",
+        "enable_tools": ["@all"],
+        "require_approval_for_tools": ["@destructive", "bind_or_flag"],
+        "preload": true
+      }
+    ],
+
+    "skills": [
+      {
+        "name": "risk-scoring",
+        "preload": true
+      }
+    ],
+
+    "config": {
+      "sandbox": {
+        "enabled": true,
+        "file_downloads": true
+      }
+    }
+  }
+}
