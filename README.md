@@ -35,7 +35,7 @@ preferred / standard / substandard / decline.
 **How TrueForge was used.** Both MCP servers are registered as
 connectors; the risk model is a git skill run in TrueForge's sandbox.
 Verified end to end on 0.2.1: activity pulled live, scored in the sandbox
-to 5.64 / preferred / $850, `tool.approval_required` raised at
+to 5.64 / preferred / $8.50, `tool.approval_required` raised at
 `bind_or_flag`, ledger empty until approval, written only after. Three
 independent guards stop the irreversible step: the approval pause, Code
 Mode's refusal to call any non-read-only tool, and the tool's own
@@ -180,11 +180,11 @@ questions to expect.
 The spread, in one line each:
 
 1. **agent-safe-01** (240 clean actions, Z=1.0) → 5.64 → **preferred,
-   $850** → auto-bind. This is the run that shows the approval pause.
+   $8.50** → auto-bind. This is the run that shows the approval pause.
 2. **agent-risky-01** (12 actions, one $9,000 exposure) → 100 →
    **decline**. Pauses too: declining is also a binding decision.
 3. **agent-borderline-01** (60 actions, Z=0.3) → 61.2 → **substandard,
-   $1,600** → flagged for review.
+   $16.00** → flagged for review.
 
 ## Still open
 

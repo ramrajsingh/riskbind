@@ -40,7 +40,7 @@ What happens, and what to point at:
 |---|---|
 | `get_agent_activity` → 240 actions, 2 flagged, max exposure $80 | "Real MCP call to a real server — that's criterion one." |
 | risk model runs in the sandbox → score **5.64**, Z = **1.0** | "Scored in the sandbox. 240 actions means full credibility — we trust this agent's own track record completely." |
-| `draft_policy_quote` → **preferred**, ×0.85, **$850** | "Preferred tier. 15% off the base premium." |
+| `draft_policy_quote` → **preferred**, ×0.85, **$8.50** | "Preferred tier. 15% off the base premium." |
 | **approval prompt appears** | *Stop talking. Let it sit for a beat.* "It will not bind without me. This is the irreversible step, and the harness stopped it." |
 | Approve → ledger line appears in the right pane | "Now it's a real policy." |
 
@@ -63,7 +63,7 @@ Type: `Now agent-risky-01.`
 Type: `And agent-borderline-01.`
 
 - 60 actions, 6 flagged, $1,200 exposure → Z = **0.3** → score **61.2** →
-  **substandard**, ×1.6, **$1,600**, recommendation **flag_for_review**.
+  **substandard**, ×1.6, **$16.00**, recommendation **flag_for_review**.
 - "Sixty actions isn't enough history to trust on its own, so the model
   shrinks this agent toward the portfolio mean — Z of 0.3. Not a decline.
   Not an auto-bind. Priced, and sent to a human underwriter."
@@ -80,8 +80,8 @@ Type: `And agent-borderline-01.`
 
 | Agent | Actions | Flagged | Max exposure | Z | Score | Tier | Outcome |
 |---|---|---|---|---|---|---|---|
-| `agent-safe-01` | 240 | 2 | $80 | 1.00 | **5.64** | preferred (×0.85) | auto_bind, **$850** |
-| `agent-borderline-01` | 60 | 6 | $1,200 | 0.30 | **61.2** | substandard (×1.6) | flag_for_review, **$1,600** |
+| `agent-safe-01` | 240 | 2 | $80 | 1.00 | **5.64** | preferred (×0.85) | auto_bind, **$8.50** |
+| `agent-borderline-01` | 60 | 6 | $1,200 | 0.30 | **61.2** | substandard (×1.6) | flag_for_review, **$16.00** |
 | `agent-risky-01` | 12 | 5 | $9,000 | 0.06 | **100.0** | decline | no premium |
 
 ## If something breaks

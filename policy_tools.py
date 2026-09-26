@@ -32,7 +32,7 @@ import time
 from dataclasses import dataclass, asdict
 from pathlib import Path
 
-BASE_PREMIUM = float(os.environ.get("RISKBIND_BASE_PREMIUM", "1000.0"))
+BASE_PREMIUM = float(os.environ.get("RISKBIND_BASE_PREMIUM", "10.0"))
 
 # The only tiers risk_model.py can emit, and the multiplier each one carries.
 # draft_policy_quote refuses anything else: a quote is only meaningful if the
