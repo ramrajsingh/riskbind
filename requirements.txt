@@ -1,0 +1,7 @@
+# mcp v1 specifically: v2 renamed FastMCP -> MCPServer, so
+# `from mcp.server.fastmcp import FastMCP` only works on <2.
+mcp[cli]>=1.9.1,<2
+
+# Used by activity_source.py, the plain-REST precursor to the MCP servers.
+fastapi
+uvicorn
