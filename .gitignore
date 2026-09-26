@@ -6,3 +6,4 @@ policy_ledger.jsonl
 .DS_Store
 .env
 .claude/
+HANDOFF.md
